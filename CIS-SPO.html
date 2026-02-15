@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CIS – Sourcing & Procurement • 50 Questions • 30 min</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: white; min-height: 100vh; }
+    .container { max-width: 900px; margin: 2rem auto; padding: 2rem; background: #1e293b; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    h1 { text-align: center; color: #38bdf8; margin-bottom: 1.5rem; }
+    .timer { font-size: 1.5rem; font-weight: bold; text-align: center; margin-bottom: 1.5rem; color: #fbbf24; }
+    .time-warning { color: #ef4444; animation: blink 1s infinite; }
+    @keyframes blink { 50% { opacity: 0.4; } }
+    .question { margin: 2rem 0; padding: 1.5rem; background: #334155; border-radius: 0.75rem; border-left: 6px solid #38bdf8; }
+    .options label { display: block; margin: 0.75rem 0; padding: 0.75rem; background: #475569; border-radius: 0.5rem; cursor: pointer; transition: all 0.2s; }
+    .options label:hover { background: #64748b; }
+    .feedback { margin-top: 1.5rem; padding: 1rem; border-radius: 0.5rem; font-weight: 600; }
+    .correct { background: #166534; color: #86efac; }
+    .incorrect { background: #7f1d1d; color: #fca5a5; }
+    button { padding: 1rem 2rem; font-size: 1.2rem; background: #38bdf8; color: white; border: none; border-radius: 0.5rem; cursor: pointer; margin: 1rem auto; display: block; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    #final { margin-top: 3rem; text-align: center; font-size: 1.4rem; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>ServiceNow CIS – Sourcing & Procurement<br>Mock Exam (90 Questions – 30 min)</h1>
+
+  <div id="start-screen" class="text-center">
+    <p class="text-xl mb-6">Click Start to begin. Timer starts immediately.<br>30 minutes • Immediate feedback after each answer</p>
+    <button id="startBtn" onclick="startExam()">Start Exam</button>
+  </div>
+
+  <div id="exam" class="hidden">
+    <div class="timer" id="timer">30:00</div>
+    <div id="questionContainer"></div>
+    <button id="nextBtn" onclick="nextQuestion()" disabled>Next Question</button>
+  </div>
+
+  <div id="final" class="hidden"></div>
+</div>
+
+<script>
+const questions = [
+  { q: "Which table stores supplier records?", a: "A", options: ["A. core_company", "B. sn_sp_supplier", "C. vendor", "D. sys_user"], exp: "core_company is the primary table for suppliers/vendors." },
+  { q: "Primary purpose of the Supplier Portal?", a: "A", options: ["A. Suppliers view RFQs, submit responses, update profile", "B. Suppliers approve POs", "C. Suppliers create catalog items", "D. Suppliers submit incidents"], exp: "Suppliers respond to sourcing events & manage their profile." },
+  { q: "Module used to create RFIs, RFQs, RFPs?", a: "B", options: ["A. Procurement Workbench", "B. Sourcing", "C. Vendor Performance", "D. Contract Management"], exp: "Sourcing module handles events (RFI/RFQ/RFP)." },
+  { q: "Correct procurement workflow order?", a: "A", options: ["A. Requisition → Order → Receipt → Payment", "B. Order → Requisition → Receipt → Payment", "C. Requisition → Receipt → Order → Payment", "D. Payment → Order → Requisition → Receipt"], exp: "Standard flow: request → order → receive → pay." },
+  { q: "Role required to create new catalog item?", a: "B", options: ["A. catalog_admin", "B. catalog_manager", "C. procurement_admin", "D. itil"], exp: "catalog_manager can create/maintain catalog items." },
+  { q: "Main difference – Blanket PO vs regular PO?", a: "A", options: ["A. Blanket PO for recurring purchases over time", "B. Blanket PO requires approval every time", "C. PO only for one-time", "D. Blanket PO cannot buy goods"], exp: "Blanket = long-term agreement with releases." },
+  { q: "Vendor Risk Management primarily assesses?", a: "B", options: ["A. Financial stability only", "B. Third-party risk (compliance, security, operational)", "C. Delivery times only", "D. Catalog pricing"], exp: "VRM focuses on broad third-party risk." },
+  { q: "Field that determines if supplier is active?", a: "B", options: ["A. Status", "B. Active", "C. State", "D. Life cycle stage"], exp: "Active checkbox controls visibility & usage." },
+  { q: "Plugin required to enable Supplier Portal?", a: "B", options: ["A. Vendor Performance Management", "B. Supplier Portal", "C. Sourcing", "D. Procurement Core"], exp: "Supplier Portal plugin activates it." },
+  { q: "Workflow triggered when user submits requisition?", a: "C", options: ["A. Procurement Workflow", "B. Order Management", "C. Requisition Approval Workflow", "D. Catalog Task Workflow"], exp: "Requisition approval flow starts on submission." },
+  { q: "Purpose of Supplier Onboarding?", a: "B", options: ["A. Create suppliers", "B. Assess & approve new suppliers before business", "C. Generate invoices", "D. Manage contracts"], exp: "Onboarding = qualification & risk assessment." },
+  { q: "Table that stores PO line items?", a: "B", options: ["A. pc_order", "B. pc_order_item", "C. requisition_line", "D. purchase_order"], exp: "pc_order_item = PO lines." },
+  { q: "Main purpose of Vendor Scorecard?", a: "A", options: ["A. Track performance (delivery, quality, responsiveness, cost)", "B. Create RFQs", "C. Approve requisitions", "D. Manage contracts"], exp: "Scorecards measure supplier KPIs." },
+  { q: "Difference between RFQ and RFP?", a: "A", options: ["A. RFQ = price/quote, RFP = proposal/solution", "B. RFP = price only", "C. Same thing", "D. RFP internal, RFQ external"], exp: "RFQ focuses on pricing; RFP on solution & capability." },
+  { q: "Plugin for Supplier Portal?", a: "B", options: ["A. Vendor Performance", "B. Supplier Portal", "C. Sourcing", "D. Procurement Core"], exp: "Supplier Portal plugin." },
+  { q: "Standard procurement process sequence?", a: "A", options: ["A. Requisition → Approval → Order → Receipt → Invoice", "B. Order → Requisition → …", "C. Invoice → Order → …", "D. Receipt → Order → …"], exp: "Requisition first → ends with invoice." },
+  { q: "Role to create new supplier?", a: "A", options: ["A. procurement_admin", "B. sn_sp_supplier_write", "C. vendor_manager", "D. itil"], exp: "procurement_admin can create suppliers." },
+  { q: "Purpose of Procurement Workbench?", a: "A", options: ["A. Single place for requisitions, orders, receipts, invoices", "B. Create catalog items", "C. Manage contracts", "D. Run risk assessments"], exp: "Workbench = central procurement operations hub." },
+  { q: "Module to compare quotes from suppliers?", a: "B", options: ["A. Vendor Performance", "B. Sourcing → Quote Comparison", "C. Procurement Workbench", "D. Contract Management"], exp: "Quote Comparison in Sourcing module." },
+  { q: "Field on PO for expected delivery?", a: "C", options: ["A. Promised date", "B. Due date", "C. Need-by date", "D. Delivery date"], exp: "Need-by date drives delivery expectation." },
+  { q: "Which table is the primary table for storing supplier / vendor records?", options: ["A. sn_sp_supplier", "B. core_company", "C. vendor_profile", "D. sys_user"], a: "B" },
+{ q: "What is the main purpose of the Supplier Portal?", options: ["A. Allow suppliers to view and respond to RFQs/RFPs", "B. Let suppliers approve purchase orders", "C. Enable suppliers to create new catalog items", "D. Allow suppliers to submit incidents"], a: "A" },
+{ q: "Which field on the supplier record determines whether the supplier can access the Supplier Portal?", options: ["A. Active", "B. Portal Access", "C. Supplier Portal Enabled", "D. Portal User"], a: "C" },
+{ q: "What is the primary use of the Vendor Scorecard?", options: ["A. Track supplier performance (delivery, quality, responsiveness, cost)", "B. Create new RFQs", "C. Approve purchase requisitions", "D. Generate invoices"], a: "A" },
+{ q: "Which role is typically required to create or update a supplier record?", options: ["A. procurement_admin", "B. itil", "C. catalog_manager", "D. sn_sp_supplier_write"], a: "A" },
+{ q: "What does the Vendor Tier field on the supplier record usually represent?", options: ["A. Supplier importance / strategic value classification", "B. Supplier location code", "C. Payment term code", "D. SLA level"], a: "A" },
+{ q: "Which module / application is used to assess third-party risk of suppliers?", options: ["A. Vendor Risk Management", "B. Supplier Portal", "C. Sourcing", "D. Contract Management"], a: "A" },
+{ q: "What is the purpose of Supplier Onboarding / Qualification?", options: ["A. Assess and approve new suppliers before doing business", "B. Generate invoices", "C. Create purchase orders", "D. Manage existing contracts"], a: "A" },
+{ q: "Which related list on the supplier record tracks individual contacts at that supplier company?", options: ["A. Contacts", "B. Supplier Contacts", "C. Users", "D. People"], a: "B" },
+{ q: "What is the typical use of the 'Supplier Certification' process?", options: ["A. Certify suppliers meet quality, compliance or security standards", "B. Generate invoices", "C. Create purchase orders", "D. Approve requisitions"], a: "A" },
+  { q: "Which module is used to create and manage RFIs, RFQs, RFPs and reverse auctions?", options: ["A. Procurement Workbench", "B. Sourcing", "C. Vendor Performance", "D. Contract Management"], a: "B" },
+{ q: "What is the main difference between RFQ and RFP?", options: ["A. RFQ focuses mainly on price/quote, RFP on solution & capability", "B. RFP is for price only, RFQ for solution", "C. They are the same", "D. RFP is internal, RFQ is external"], a: "A" },
+{ q: "Which role is typically required to create a new sourcing event?", options: ["A. sourcing_admin", "B. procurement_admin", "C. buyer", "D. itil"], a: "A" },
+{ q: "In Sourcing, what does the 'Award' action do?", options: ["A. Select winning supplier and create contract / order", "B. Close the event", "C. Reject all quotes", "D. Create new RFQ"], a: "A" },
+{ q: "Which module allows buyers to compare quotes from multiple suppliers side-by-side?", options: ["A. Vendor Performance", "B. Sourcing → Quote Comparison", "C. Procurement Workbench", "D. Contract Management"], a: "B" },
+{ q: "Which type of sourcing event is used when price is the primary selection criterion?", options: ["A. RFP", "B. RFQ", "C. RFI", "D. Auction"], a: "B" },
+{ q: "What is the purpose of an RFI (Request for Information)?", options: ["A. Gather information / market capabilities before formal RFQ/RFP", "B. Get firm pricing", "C. Select a supplier", "D. Award a contract"], a: "A" },
+{ q: "Which field on a sourcing event determines the currency for quotes?", options: ["A. Currency", "B. Price", "C. Rate", "D. Exchange"], a: "A" },
+{ q: "What happens when a sourcing event is closed without awarding?", options: ["A. No order/contract is created", "B. Automatic PO is generated", "C. All suppliers are blacklisted", "D. Event is deleted"], a: "A" },
+{ q: "Which plugin must be activated to use the Sourcing module?", options: ["A. Sourcing", "B. Procurement Core", "C. Vendor Performance", "D. Supplier Portal"], a: "A" },
+  { q: "What is the correct high-level procurement process sequence?", options: ["A. Requisition → Approval → Order → Receipt → Invoice", "B. Order → Requisition → Approval → Receipt → Invoice", "C. Invoice → Order → Receipt → Requisition → Approval", "D. Receipt → Order → Requisition → Invoice → Approval"], a: "A" },
+{ q: "Which table stores purchase requisition line items?", options: ["A. requisition", "B. requisition_line", "C. pc_order_item", "D. purchase_order"], a: "B" },
+{ q: "Which table stores purchase order line items?", options: ["A. pc_order", "B. pc_order_item", "C. requisition_line", "D. purchase_order"], a: "B" },
+{ q: "Which table stores goods receipts?", options: ["A. pc_receipt", "B. pc_order_item", "C. requisition_line", "D. purchase_order"], a: "A" },
+{ q: "What is the main difference between Requisition and Purchase Order?", options: ["A. Requisition is a request, PO is a legal commitment to buy", "B. PO is a request, Requisition is a commitment", "C. They are the same", "D. Requisition is internal only"], a: "A" },
+{ q: "Which field on the Purchase Order is used for three-way matching with receipt & invoice?", options: ["A. PO Number", "B. Invoice Number", "C. Receipt Number", "D. Requisition Number"], a: "A" },
+{ q: "What is a Blanket Purchase Order primarily used for?", options: ["A. Recurring / scheduled purchases over a period", "B. One-time capital purchases", "C. Emergency purchases", "D. Internal stock transfers"], a: "A" },
+{ q: "Which role typically approves purchase requisitions?", options: ["A. procurement_admin", "B. approver_user", "C. itil", "D. catalog_manager"], a: "B" },
+{ q: "What is the purpose of the Procurement Workbench?", options: ["A. Central place to manage requisitions, orders, receipts, invoices", "B. Create catalog items", "C. Manage supplier contracts", "D. Run vendor risk assessments"], a: "A" },
+{ q: "Which field on the requisition line determines when the item is needed?", options: ["A. Need-by date", "B. Promised date", "C. Due date", "D. Delivery date"], a: "A" },// ... (questions 21–50 follow the same pattern – full 50-question set is included below in the code)
+ { q: "Which role is typically required to create or maintain catalog items?", options: ["A. catalog_admin", "B. catalog_manager", "C. procurement_admin", "D. itil"], a: "B" },
+{ q: "Which type of catalog is primarily used for procurement / purchase requests?", options: ["A. Service Catalog", "B. Procurement Catalog", "C. Employee Catalog", "D. Vendor Catalog"], a: "B" },
+{ q: "What is the purpose of a Variable Set in a catalog item?", options: ["A. Group related variables together for reuse across items", "B. Store supplier information", "C. Define approval rules", "D. Set price"], a: "A" },
+{ q: "Which workflow is usually triggered when a user submits a catalog item request?", options: ["A. Catalog Task Workflow", "B. Requisition Approval Workflow", "C. Order Management Workflow", "D. Procurement Workflow"], a: "B" },
+{ q: "What is the main purpose of the 'Catalog Client Script'?", options: ["A. Client-side validation and dynamic behavior on catalog form", "B. Server-side business logic", "C. Workflow approval", "D. Supplier portal access"], a: "A" },
+{ q: "Which field controls whether a catalog item is visible to users?", options: ["A. Active", "B. Visible", "C. Available", "D. Published"], a: "A" },
+{ q: "What is required to make a catalog item requestable by a specific group only?", options: ["A. User Criteria record", "B. Role", "C. Group membership", "D. Catalog filter"], a: "A" },
+{ q: "Which script type can be used to auto-populate variables on a catalog item?", options: ["A. Catalog Client Script (onLoad/onChange)", "B. Business Rule", "C. Workflow Script", "D. UI Policy"], a: "A" },
+{ q: "What is the purpose of 'Order Guides' in the catalog?", options: ["A. Bundle multiple related items into one request", "B. Create new suppliers", "C. Approve requisitions", "D. Manage contracts"], a: "A" },
+{ q: "Which table stores submitted catalog requests?", options: ["A. sc_request", "B. sc_req_item", "C. sc_task", "D. sc_cat_item"], a: "A" },
+  // ───────────────────────────────────────────────
+// 1. Supplier / Vendor Management (additional 10)
+// ───────────────────────────────────────────────
+{ q: "Which field on the Supplier [core_company] record controls whether the supplier appears in search results and can be selected on forms?", options: ["A. Vendor", "B. Active", "C. Supplier", "D. Visible"], a: "B" },
+{ q: "What is the most common way to assign a Supplier Manager to a supplier record?", options: ["A. Reference field 'Managed by'", "B. Assignment group", "C. Business owner", "D. Primary contact"], a: "A" },
+{ q: "Which related list on the supplier record shows sourcing events (RFQs/RFPs) the supplier has participated in?", options: ["A. Sourcing Events", "B. Supplier Events", "C. RFx Participation", "D. Quotes"], a: "C" },
+{ q: "What is the purpose of the 'Vendor Classification' field on the supplier record?", options: ["A. Categorize suppliers (Strategic, Preferred, Approved, etc.)", "B. Set payment terms", "C. Define currency", "D. Track location"], a: "A" },
+{ q: "Which plugin must be active to use the Supplier Lifecycle Operations (SLO) module?", options: ["A. Supplier Lifecycle Operations", "B. Vendor Risk Management", "C. Sourcing", "D. Procurement Core"], a: "A" },
+{ q: "What does the 'Supplier Lifecycle Stage' field typically track?", options: ["A. Prospect → Pending → Active → Inactive → Archived", "B. Active → Inactive only", "C. Tier 1 → Tier 2 → Tier 3", "D. Risk level"], a: "A" },
+{ q: "Which role can normally update the 'Supplier Tier' or 'Vendor Classification' field?", options: ["A. procurement_admin or vendor_manager", "B. itil", "C. catalog_manager", "D. sn_sp_supplier_read"], a: "A" },
+{ q: "What is the primary purpose of the 'Supplier Profile' page in the Supplier Portal?", options: ["A. Allow suppliers to update their company information, contacts, banking details", "B. Respond to RFQs", "C. View invoices", "D. Submit requisitions"], a: "A" },
+{ q: "Which field determines the default currency for a supplier?", options: ["A. Currency", "B. Payment currency", "C. Billing currency", "D. Transaction currency"], a: "A" },
+{ q: "What happens when a supplier is set to Inactive?", options: ["A. Cannot be selected on new POs/requisitions/RFQs", "B. All existing POs are cancelled", "C. Supplier Portal access is revoked", "D. All three"], a: "A" },
+
+// ───────────────────────────────────────────────
+// 2. Sourcing / Sourcing Events (additional 10)
+// ───────────────────────────────────────────────
+{ q: "Which field on a sourcing event controls whether suppliers can see each other's quotes?", options: ["A. Blind bidding", "B. Sealed bid", "C. Open bidding", "D. Visibility"], a: "B" },
+{ q: "What is the purpose of the 'Evaluation Committee' related list on a sourcing event?", options: ["A. Assign evaluators to score responses", "B. List suppliers", "C. Track approvals", "D. Store quotes"], a: "A" },
+{ q: "Which status indicates that a sourcing event is waiting for supplier responses?", options: ["A. Draft", "B. Published", "C. In Progress", "D. Closed"], a: "B" },
+{ q: "What is required to allow suppliers to submit multiple rounds of quotes in a negotiation event?", options: ["A. Enable multi-round bidding", "B. Use reverse auction", "C. Activate Negotiation module", "D. All of the above"], a: "A" },
+{ q: "Which type of sourcing event allows suppliers to see current lowest bid and improve their offer?", options: ["A. RFQ", "B. Reverse Auction", "C. RFP", "D. RFI"], a: "B" },
+{ q: "What is the purpose of 'Weighted Scoring' in a sourcing event?", options: ["A. Score suppliers on multiple criteria with different importance weights", "B. Rank quotes by price only", "C. Auto-award to lowest price", "D. Reject high scores"], a: "A" },
+{ q: "Which field on a sourcing event determines the due date for supplier responses?", options: ["A. Response due date", "B. Close date", "C. Award date", "D. Published date"], a: "A" },
+{ q: "What happens when a sourcing event is awarded?", options: ["A. Contract or purchase order can be generated from the winning response", "B. All quotes are deleted", "C. Event is archived", "D. Suppliers are notified of rejection only"], a: "A" },
+{ q: "Which plugin is required for Reverse Auctions?", options: ["A. Sourcing", "B. Auction Management", "C. Procurement Core", "D. Supplier Portal"], a: "A" },
+{ q: "What is the purpose of the 'Supplier Response' related list on a sourcing event?", options: ["A. Store each supplier's submitted quote/response", "B. Track event status", "C. List evaluation scores", "D. Store contract terms"], a: "A" },
+
+// ───────────────────────────────────────────────
+// 3. Procurement / PO / Requisition (additional 10)
+// ───────────────────────────────────────────────
+{ q: "Which field on the requisition line is used to select the requested item?", options: ["A. Cat item", "B. Product", "C. Part number", "D. Description"], a: "A" },
+{ q: "What is the purpose of the 'Convert to Order' UI action on an approved requisition?", options: ["A. Create purchase order(s) from requisition lines", "B. Close the requisition", "C. Generate receipt", "D. Send invoice"], a: "A" },
+{ q: "Which field on the Purchase Order controls the total currency of the order?", options: ["A. Currency", "B. Price", "C. Rate", "D. Exchange rate"], a: "A" },
+{ q: "What is required for three-way matching to work automatically?", options: ["A. Matching rules configured + PO, Receipt, Invoice quantities/prices match", "B. Manual approval only", "C. Supplier Portal", "D. Blanket PO"], a: "A" },
+{ q: "Which table stores invoice records?", options: ["A. pc_invoice", "B. pc_order", "C. requisition", "D. pc_receipt"], a: "A" },
+{ q: "What is the main purpose of a 'Receipt'?", options: ["A. Record that goods/services were received", "B. Approve payment", "C. Create PO", "D. Submit requisition"], a: "A" },
+{ q: "Which field on the PO determines whether partial receipts are allowed?", options: ["A. Partial receipt allowed", "B. Receive partial", "C. Allow partial", "D. Receipt tolerance"], a: "A" },
+{ q: "What is the purpose of the 'Procurement Receipt' business rule?", options: ["A. Update stock / inventory when goods are received", "B. Send invoice", "C. Create PO", "D. Approve requisition"], a: "A" },
+{ q: "Which role can typically receive goods against a PO?", options: ["A. receiver", "B. procurement_admin", "C. itil", "D. catalog_manager"], a: "A" },
+{ q: "What happens when a receipt is created against a PO?", options: ["A. PO line status updates, inventory may increase, three-way match can proceed", "B. PO is closed", "C. Invoice is auto-paid", "D. Requisition is deleted"], a: "A" },
+  // For brevity in this response, the code contains the full 50.
+];
+
+let currentQuestion = 0;
+let score = 0;
+let timerInterval;
+let timeLeft = 30 * 60; // 30 minutes in seconds
+let answered = new Array(questions.length).fill(false);
+
+function startExam() {
+  document.getElementById('start-screen').classList.add('hidden');
+  document.getElementById('exam').classList.remove('hidden');
+  startTimer();
+  showQuestion();
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const min = Math.floor(timeLeft / 60);
+    const sec = timeLeft % 60;
+    document.getElementById('timer').textContent = `${min}:${sec.toString().padStart(2, '0')}`;
+    if (timeLeft <= 300) document.getElementById('timer').classList.add('time-warning');
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      endExam();
+    }
+  }, 1000);
+}
+
+function showQuestion() {
+  const q = questions[currentQuestion];
+  const container = document.getElementById('questionContainer');
+  container.innerHTML = `
+    <div class="question">
+      <h3>Question ${currentQuestion + 1} of ${questions.length}</h3>
+      <p>${q.q}</p>
+      <div class="options">
+        ${q.options.map((opt, i) => `
+          <label>
+            <input type="radio" name="q${currentQuestion}" value="${String.fromCharCode(65 + i)}" onchange="selectAnswer('${String.fromCharCode(65 + i)}')">
+            ${opt}
+          </label>
+        `).join('')}
+      </div>
+      <div id="feedback${currentQuestion}" class="feedback hidden"></div>
+    </div>
+  `;
+  document.getElementById('nextBtn').disabled = true;
+}
+
+function selectAnswer(letter) {
+  document.getElementById('nextBtn').disabled = false;
+  const q = questions[currentQuestion];
+  const feedbackDiv = document.getElementById(`feedback${currentQuestion}`);
+  const isCorrect = letter === q.a;
+
+  feedbackDiv.classList.remove('hidden');
+  if (isCorrect) {
+    feedbackDiv.className = 'feedback correct';
+    feedbackDiv.innerHTML = '<i class="fa-solid fa-check-circle"></i> Correct!<br><small>' + q.exp + '</small>';
+    score++;
+  } else {
+    feedbackDiv.className = 'feedback incorrect';
+    feedbackDiv.innerHTML = `<i class="fa-solid fa-times-circle"></i> Incorrect.<br>Correct answer: ${q.a}<br><small>${q.exp}</small>`;
+  }
+
+  answered[currentQuestion] = true;
+}
+
+function nextQuestion() {
+  currentQuestion++;
+  if (currentQuestion < questions.length) {
+    showQuestion();
+  } else {
+    endExam();
+  }
+}
+
+function endExam() {
+  clearInterval(timerInterval);
+  document.getElementById('exam').classList.add('hidden');
+  const percentage = Math.round((score / questions.length) * 100);
+  document.getElementById('final').innerHTML = `
+    <h2 class="text-4xl font-bold ${percentage >= 75 ? 'text-green-400' : 'text-red-400'}">
+      ${score} / ${questions.length} (${percentage}%)
+    </h2>
+    <p class="text-xl mt-4">${percentage >= 75 ? 'Strong – likely pass territory' : 'Needs more review – focus on weak areas'}</p>
+    <button onclick="location.reload()" class="mt-6 bg-blue-600 hover:bg-blue-700 px-8 py-4 rounded-lg text-xl">
+      Restart Exam
+    </button>
+  `;
+  document.getElementById('final').classList.remove('hidden');
+}
+</script>
+</body>
+</html>
